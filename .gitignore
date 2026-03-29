@@ -1,0 +1,50 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# AI生成的缓存和日志
+.npm
+.npm-cache
+.opencode
+.opencode.yaml
+.opencode/*
+.ai*
+*.ai.*
+
+node_modules
+dist
+dist-ssr
+src-tauri/target
+src-tauri/target/release
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Wrangler
+.wrangler
+.dev.vars
+
+# Test Data
+test_data_*.json
+
+# Android release artifacts
+android/keystore.properties
+android/app/temp-release.keystore
+
+# Android构建产出
+android/build/
+android/app/build/

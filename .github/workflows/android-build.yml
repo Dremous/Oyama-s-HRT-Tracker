@@ -56,18 +56,21 @@ jobs:
         run: npm run android:sync
 
       - name: Create keystore for release
+        env:
+          KS_FILE: ${{ secrets.KS_FILE }}
+          KS_STORE_PASS: ${{ secrets.KS_STORE_PASS }}
+          KS_KEY_PASS: ${{ secrets.KS_KEY_PASS }}
+          KS_ALIAS: ${{ secrets.KS_ALIAS }}
         run: |
+          mkdir -p android/app
           cd android/app
-          echo "${{ secrets.KS_FILE }}" > /tmp/keystore_b64.txt
-          wc -c /tmp/keystore_b64.txt
-          head -c 100 /tmp/keystore_b64.txt
-          base64 -d /tmp/keystore_b64.txt > key.jks
+          printf '%s' "$KS_FILE" | base64 -d > key.jks
           ls -la key.jks
           cd ..
-          echo "storePassword=${{ secrets.KS_STORE_PASS }}" > keystore.properties
-          echo "keyPassword=${{ secrets.KS_KEY_PASS }}" >> keystore.properties
-          echo "keyAlias=${{ secrets.KS_ALIAS }}" >> keystore.properties
-          echo "storeFile=app/key.jks" >> keystore.properties
+          printf 'storePassword=%s\n' "$KS_STORE_PASS" > keystore.properties
+          printf 'keyPassword=%s\n' "$KS_KEY_PASS" >> keystore.properties
+          printf 'keyAlias=%s\n' "$KS_ALIAS" >> keystore.properties
+          printf 'storeFile=app/key.jks\n' >> keystore.properties
           cat keystore.properties
 
       - name: Build release APK

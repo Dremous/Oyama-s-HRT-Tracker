@@ -36,7 +36,6 @@ import Home from './pages/Home';
 import History from './pages/History';
 import Lab from './pages/Lab';
 import Settings from './pages/Settings';
-import Account from './pages/Account';
 import Admin from './pages/Admin';
 import SessionsPage from './pages/Sessions';
 import TwoFactorPage from './pages/TwoFactor';
@@ -407,23 +406,6 @@ const AppContent = () => {
                             setIsWeightModalOpen={setIsWeightModalOpen}
                             pkParams={pkParams}
                             onNavigateToPKParams={() => handleViewChange('pk-params')}
-                        />
-                    )}
-
-                    {currentView === 'account' && (
-                        <Account
-                            t={t}
-                            user={user}
-                            token={token}
-                            onOpenAuth={() => setIsAuthModalOpen(true)}
-                            onLogout={logout}
-                            onCloudSave={handleCloudSave}
-                            onCloudLoad={handleCloudLoad}
-                            onCloudMerge={handleCloudMerge}
-                            localData={{ events, labResults, doseTemplates, weight }}
-                            onNavigate={(v) => handleViewChange(v as ViewKey)}
-                            twoFAEnabled={twoFAEnabled}
-                            onTwoFAStatusChange={setTwoFAEnabled}
                         />
                     )}
 

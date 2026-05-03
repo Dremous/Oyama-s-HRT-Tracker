@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Activity, ListTodo, FlaskConical, Settings as SettingsIcon, UserCircle, ShieldCheck } from 'lucide-react';
+import { Activity, ListTodo, FlaskConical, Settings as SettingsIcon, ShieldCheck } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
 
 export type ViewKey = 'home' | 'history' | 'lab' | 'settings' | 'account' | 'admin' | 'sessions' | 'two-factor' | 'pk-params';
@@ -36,7 +36,6 @@ export const useAppNavigation = (user: any) => {
         { id: 'history', label: t('nav.history'), icon: ListTodo },
         { id: 'lab', label: t('nav.lab'), icon: FlaskConical },
         { id: 'settings', label: t('nav.settings'), icon: SettingsIcon },
-        { id: 'account', label: t('nav.account'), icon: UserCircle },
     ];
 
     if (user?.isAdmin) {

@@ -325,7 +325,7 @@ const AppContent = () => {
                 <div
                     ref={mainScrollRef}
                     key={currentView}
-                    className={`flex-1 flex flex-col overflow-y-auto scrollbar-hide page-transition ${transitionDirection === 'forward' ? 'page-forward' : 'page-backward'}`}
+                    className={`flex-1 flex flex-col overflow-y-auto scrollbar-hide page-transition android-top-gap ${transitionDirection === 'forward' ? 'page-forward' : 'page-backward'}`}
                 >
                     {currentView === 'home' && (
                         <Home

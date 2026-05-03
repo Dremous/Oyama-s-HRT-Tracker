@@ -43,7 +43,7 @@ const Home: React.FC<HomeProps> = ({
     return (
         <>
             <EstimateInfoModal isOpen={isEstimateInfoOpen} onClose={() => setIsEstimateInfoOpen(false)} />
-            <header className="relative px-4 md:px-8 pt-4 md:pt-6 pb-2">
+            <header className="relative px-4 md:px-8 pt-6 md:pt-8 pb-2">
                 <div className="flex flex-col gap-4">
 
                     {/* Main Estimate Card - Flat Design */}

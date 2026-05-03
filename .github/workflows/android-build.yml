@@ -59,16 +59,19 @@ jobs:
         run: |
           cd android/app
           echo "$KEYSTORE_FILE" | base64 -d > key.jks
+          ls -la key.jks
+          keytool -list -keystore key.jks -storepass 547899 -storetype JKS 2>&1 || echo "Keytool failed"
           echo "storePassword=$STORE_PASSWORD" > keystore.properties
           echo "keyPassword=$KEY_PASSWORD" >> keystore.properties
           echo "keyAlias=$KEY_ALIAS" >> keystore.properties
           echo "storeFile=key.jks" >> keystore.properties
+          cat keystore.properties
 
       - name: Build release APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --build-cache
+          ./gradlew assembleRelease --build-cache --info 2>&1 | tail -50
 
       - name: Check APK output
         run: find android/app/build/outputs -name "*.apk" 2>/dev/null || echo "No APK found"

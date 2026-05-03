@@ -58,7 +58,11 @@ jobs:
       - name: Create keystore for release
         run: |
           cd android/app
-          echo "${{ secrets.KS_FILE }}" | base64 -d > key.jks
+          echo "${{ secrets.KS_FILE }}" > /tmp/keystore_b64.txt
+          wc -c /tmp/keystore_b64.txt
+          head -c 100 /tmp/keystore_b64.txt
+          base64 -d /tmp/keystore_b64.txt > key.jks
+          ls -la key.jks
           cd ..
           echo "storePassword=${{ secrets.KS_STORE_PASS }}" > keystore.properties
           echo "keyPassword=${{ secrets.KS_KEY_PASS }}" >> keystore.properties

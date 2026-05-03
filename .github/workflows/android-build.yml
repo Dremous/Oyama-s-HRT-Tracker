@@ -69,6 +69,9 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --build-cache
 
+      - name: Check APK output
+        run: find android/app/build/outputs -name "*.apk" 2>/dev/null || echo "No APK found"
+
       - name: Upload to Release
         if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1

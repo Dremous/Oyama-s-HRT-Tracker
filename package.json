@@ -60,7 +60,7 @@
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vite-plugin-pwa": "^1.2.0",
-    "wrangler": "^4.69.0",
+    "wrangler": "^4.87.0",
     "@capacitor/android": "^7.4.3",
     "@capacitor/cli": "^7.4.3"
   }

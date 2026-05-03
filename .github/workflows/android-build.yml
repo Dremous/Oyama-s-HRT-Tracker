@@ -2,17 +2,8 @@ name: Android Build
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - 1.0.2
-    paths:
-      - 'src/**'
-      - 'logic.ts'
-      - 'index.html'
-      - 'package.json'
-      - 'vite.config.ts'
-      - 'capacitor.config.ts'
+  release:
+    types: [published]
 
 env:
   JAVA_VERSION: '21'
@@ -55,29 +46,26 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: v${{ env.VERSION }}
-          release_name: HRT Tracker v${{ env.VERSION }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Upload to Release
+        if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ github.event.release.upload_url }}
           asset_path: android/app/build/outputs/apk/debug/*.apk
-          asset_name: HRT-Tracker-${{ env.VERSION }}.apk
+          asset_name: HRT-Tracker-${{ github.event.release.tag_name }}.apk
           asset_content_type: application/vnd.android.package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload APK artifact
+        if: github.event_name != 'release'
         uses: actions/upload-artifact@v4
         with:
-          name: android-debug-apk-${{ env.VERSION }}
+          name: android-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk

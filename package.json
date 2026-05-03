@@ -46,6 +46,9 @@
     "serialize-javascript": "^7.0.3"
   },
   "devDependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
     "@cloudflare/workers-types": "^4.20251205.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@tauri-apps/cli": "^1.6.3",

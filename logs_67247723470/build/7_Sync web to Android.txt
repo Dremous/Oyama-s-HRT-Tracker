@@ -1,0 +1,47 @@
+﻿2026-05-03T14:27:47.9971246Z ##[group]Run npm run android:sync
+2026-05-03T14:27:47.9971577Z [36;1mnpm run android:sync[0m
+2026-05-03T14:27:47.9993980Z shell: /usr/bin/bash -e {0}
+2026-05-03T14:27:47.9994216Z env:
+2026-05-03T14:27:47.9994393Z   JAVA_VERSION: 21
+2026-05-03T14:27:47.9994703Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.10-7/x64
+2026-05-03T14:27:47.9995177Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.10-7/x64
+2026-05-03T14:27:47.9995568Z   ANDROID_HOME: /usr/local/lib/android/sdk
+2026-05-03T14:27:47.9995851Z   ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+2026-05-03T14:27:47.9996117Z ##[endgroup]
+2026-05-03T14:27:48.1197047Z 
+2026-05-03T14:27:48.1197722Z > app@1.4.0 android:sync
+2026-05-03T14:27:48.1198659Z > npm run build && npx cap sync android
+2026-05-03T14:27:48.1199016Z 
+2026-05-03T14:27:48.2375294Z 
+2026-05-03T14:27:48.2375959Z > app@1.4.0 build
+2026-05-03T14:27:48.2376321Z > vite build
+2026-05-03T14:27:48.2376500Z 
+2026-05-03T14:27:48.4581658Z [36mvite v6.4.1 [32mbuilding for production...[36m[39m
+2026-05-03T14:27:48.7438005Z transforming...
+2026-05-03T14:27:54.9973250Z [32m✓[39m 2412 modules transformed.
+2026-05-03T14:27:55.4149607Z rendering chunks...
+2026-05-03T14:27:55.7635770Z computing gzip size...
+2026-05-03T14:27:55.8042608Z [2mdist/[22m[32mregisterSW.js                       [39m[1m[2m    0.13 kB[22m[1m[22m
+2026-05-03T14:27:55.8044263Z [2mdist/[22m[32mmanifest.webmanifest                [39m[1m[2m    0.44 kB[22m[1m[22m
+2026-05-03T14:27:55.8046083Z [2mdist/[22m[32mindex.html                          [39m[1m[2m    0.86 kB[22m[1m[22m[2m │ gzip:   0.49 kB[22m
+2026-05-03T14:27:55.8048350Z [2mdist/[22m[2massets/[22m[35mindex-KyY4syUV.css           [39m[1m[2m   87.03 kB[22m[1m[22m[2m │ gzip:  14.63 kB[22m
+2026-05-03T14:27:55.8050457Z [2mdist/[22m[2massets/[22m[36mpurify.es-BgtpMKW3.js        [39m[1m[2m   22.77 kB[22m[1m[22m[2m │ gzip:   8.79 kB[22m
+2026-05-03T14:27:55.8052514Z [2mdist/[22m[2massets/[22m[36mindex.es-DwpAPDZk.js         [39m[1m[2m  159.38 kB[22m[1m[22m[2m │ gzip:  53.43 kB[22m
+2026-05-03T14:27:55.8054612Z [2mdist/[22m[2massets/[22m[36mhtml2canvas.esm-QH1iLAAe.js  [39m[1m[2m  202.38 kB[22m[1m[22m[2m │ gzip:  48.04 kB[22m
+2026-05-03T14:27:55.8056124Z [2mdist/[22m[2massets/[22m[36mindex-Dw4EV5L7.js            [39m[1m[33m1,580.95 kB[39m[22m[2m │ gzip: 445.14 kB[22m
+2026-05-03T14:27:55.8056756Z [33m
+2026-05-03T14:27:55.8057253Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2026-05-03T14:27:55.8057806Z - Using dynamic import() to code-split the application
+2026-05-03T14:27:55.8059115Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-05-03T14:27:55.8060122Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+2026-05-03T14:27:55.8060654Z [32m✓ built in 7.32s[39m
+2026-05-03T14:27:58.2707148Z 
+2026-05-03T14:27:58.2712344Z [36mPWA v1.2.0[39m
+2026-05-03T14:27:58.2713086Z mode      [35mgenerateSW[39m
+2026-05-03T14:27:58.2718327Z precache  [32m11 entries[39m [2m(2005.38 KiB)[22m
+2026-05-03T14:27:58.2718908Z files generated
+2026-05-03T14:27:58.2719375Z   [2mdist/sw.js[22m
+2026-05-03T14:27:58.2719929Z   [2mdist/workbox-1d305bb8.js[22m
+2026-05-03T14:27:59.2295434Z npm error could not determine executable to run
+2026-05-03T14:27:59.2309449Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-05-03T14_27_58_444Z-debug-0.log
+2026-05-03T14:27:59.2466494Z ##[error]Process completed with exit code 1.

@@ -1,7 +1,7 @@
 {
   "name": "app",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,12 +13,7 @@
     "wrangler:migrate:remote": "wrangler d1 execute hrt-tracker-prod --remote --file=schema.sql",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "tauri": "tauri",
-    "android:sync": "npm run build && npx cap sync android",
-    "android:open": "npx cap open android",
-    "android:run": "npm run build && npx cap run android",
-    "android:copy": "npm run build && npx cap copy android",
-    "android:release": "npm run android:sync && cd android && gradlew.bat assembleRelease"
+    "tauri": "tauri"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -40,8 +35,7 @@
     "react-easy-crop": "^5.5.6",
     "recharts": "^2.12.7",
     "tailwind-merge": "^3.4.0",
-    "uuid": "^9.0.1",
-    "@capacitor/core": "^7.4.3"
+    "uuid": "^9.0.1"
   },
   "overrides": {
     "serialize-javascript": "^7.0.3"
@@ -60,8 +54,6 @@
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vite-plugin-pwa": "^1.2.0",
-    "wrangler": "^4.69.0",
-    "@capacitor/android": "^7.4.3",
-    "@capacitor/cli": "^7.4.3"
+    "wrangler": "^4.69.0"
   }
 }

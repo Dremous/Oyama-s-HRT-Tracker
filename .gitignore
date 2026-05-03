@@ -7,15 +7,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# AI生成的缓存和日志
-.npm
-.npm-cache
-.opencode
-.opencode.yaml
-.opencode/*
-.ai*
-*.ai.*
-
 node_modules
 dist
 dist-ssr
@@ -40,11 +31,3 @@ src-tauri/target/release
 
 # Test Data
 test_data_*.json
-
-# Android release artifacts
-android/keystore.properties
-android/app/temp-release.keystore
-
-# Android构建产出
-android/build/
-android/app/build/

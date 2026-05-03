@@ -2,15 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Activity, Calendar, FlaskConical, Settings as SettingsIcon, UserCircle, ShieldCheck } from 'lucide-react';
 import { useTranslation, LanguageProvider } from './contexts/LanguageContext';
 import { useDialog, DialogProvider } from './contexts/DialogContext';
+import { HRTModeProvider } from './contexts/HRTModeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { APP_VERSION } from './constants';
 import { DoseEvent, LabResult, createCalibrationInterpolator, decompressData, encryptData, decryptData } from '../logic';
 import { DoseTemplate } from './components/DoseFormModal';
 import { useAppData } from './hooks/useAppData';
 import { useAppNavigation, ViewKey } from './hooks/useAppNavigation';
-import { exportTextFile, copyTextToClipboard } from './services/deviceExport';
-import { featureFlags } from './platform/features';
-import { isAndroidApp } from './platform/env';
 
 // Define NavItem interface to match what useAppNavigation returns
 interface NavItem {
@@ -23,15 +21,14 @@ import WeightEditorModal from './components/WeightEditorModal';
 import DoseFormModal from './components/DoseFormModal';
 import ImportModal from './components/ImportModal';
 import ExportModal from './components/ExportModal';
-import PasswordDisplayModal from './components/PasswordDisplayModal';
 import Sidebar from './components/Sidebar';
 import PasswordInputModal from './components/PasswordInputModal';
 import DisclaimerModal from './components/DisclaimerModal';
+import TransparencyModal from './components/TransparencyModal';
 import LabResultModal from './components/LabResultModal';
 import AuthModal from './components/AuthModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ReloadPrompt from './components/ReloadPrompt';
-import Ripple from './components/Ripple';
 
 import { cloudService } from './services/cloud';
 
@@ -42,12 +39,15 @@ import Lab from './pages/Lab';
 import Settings from './pages/Settings';
 import Account from './pages/Account';
 import Admin from './pages/Admin';
+import SessionsPage from './pages/Sessions';
+import TwoFactorPage from './pages/TwoFactor';
+import PKParamsPage from './pages/PKParams';
 
 const AppContent = () => {
     const { t, lang, setLang } = useTranslation();
     const { showDialog } = useDialog();
-    const { user, token, logout } = useAuth();
-    const androidApp = isAndroidApp();
+    const { user, token, logout, needsSetup2FA, clearSetup2FA } = useAuth();
+    const [twoFAEnabled, setTwoFAEnabled] = useState(false);
 
     // Use Custom Hooks
     const {
@@ -60,12 +60,18 @@ const AppContent = () => {
         calibrationFn,
         currentLevel,
         currentCPA,
+        currentT,
         currentStatus,
         groupedEvents,
         addEvent, updateEvent, deleteEvent, clearAllEvents,
         addLabResult, updateLabResult, deleteLabResult, clearLabResults,
         addTemplate, deleteTemplate,
-        processImportedData
+        addQuickDose, deleteQuickDose,
+        quickDoses,
+        pkParams, setPkParams, clearPkParams, resetPkParams,
+        processImportedData,
+        mergeImportedData,
+        buildExportPayload
     } = useAppData(showDialog);
 
     const {
@@ -83,13 +89,12 @@ const AppContent = () => {
     const [editingEvent, setEditingEvent] = useState<DoseEvent | null>(null);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-    const [generatedPassword, setGeneratedPassword] = useState("");
-    const [isPasswordDisplayOpen, setIsPasswordDisplayOpen] = useState(false);
     const [isPasswordInputOpen, setIsPasswordInputOpen] = useState(false);
     const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
     const [isQuickAddLabOpen, setIsQuickAddLabOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
+    const [isTransparencyOpen, setIsTransparencyOpen] = useState(false);
     const [isLabModalOpen, setIsLabModalOpen] = useState(false);
     const [editingLab, setEditingLab] = useState<LabResult | null>(null);
     const [pendingImportText, setPendingImportText] = useState<string | null>(null);
@@ -102,6 +107,12 @@ const AppContent = () => {
 
 
     // --- Theme Effect ---
+    useEffect(() => {
+        if (needsSetup2FA && user && currentView !== 'two-factor') {
+            handleViewChange('two-factor');
+        }
+    }, [needsSetup2FA, user]);
+
     useEffect(() => {
         localStorage.setItem('app-theme', theme);
         const root = window.document.documentElement;
@@ -139,10 +150,10 @@ const AppContent = () => {
     // --- Modal Logic Wrappers ---
 
     useEffect(() => {
-        const shouldLock = isExportModalOpen || isPasswordDisplayOpen || isPasswordInputOpen || isWeightModalOpen || isFormOpen || isImportModalOpen || isDisclaimerOpen || isLabModalOpen;
+        const shouldLock = isExportModalOpen || isPasswordInputOpen || isWeightModalOpen || isFormOpen || isImportModalOpen || isDisclaimerOpen || isLabModalOpen || isTransparencyOpen;
         document.body.style.overflow = shouldLock ? 'hidden' : '';
         return () => { document.body.style.overflow = ''; };
-    }, [isExportModalOpen, isPasswordDisplayOpen, isPasswordInputOpen, isWeightModalOpen, isFormOpen, isImportModalOpen, isDisclaimerOpen, isLabModalOpen]);
+    }, [isExportModalOpen, isPasswordInputOpen, isWeightModalOpen, isFormOpen, isImportModalOpen, isDisclaimerOpen, isLabModalOpen, isTransparencyOpen]);
 
 
     const importEventsFromJson = async (text: string): Promise<boolean> => {
@@ -213,85 +224,88 @@ const AppContent = () => {
             showDialog('alert', t('drawer.empty_export'));
             return;
         }
-        const exportData = {
-            meta: { version: 1, exportedAt: new Date().toISOString() },
-            weight: weight,
-            events: events,
-            labResults: labResults,
-            doseTemplates: doseTemplates
-        };
+        const exportData = buildExportPayload();
         const json = JSON.stringify(exportData, null, 2);
-        copyTextToClipboard(json).then(() => {
+        navigator.clipboard.writeText(json).then(() => {
             showDialog('alert', t('drawer.export_copied'));
         }).catch(err => {
             console.error('Failed to copy: ', err);
-            showDialog('alert', t('drawer.import_error'));
         });
     };
 
-    const handleExportConfirm = async (encrypt: boolean, customPassword?: string) => {
+    const downloadFile = (data: string, filename: string) => {
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleExportConfirm = async (encrypt: boolean, customPassword?: string): Promise<string | null> => {
         setIsExportModalOpen(false);
-        const exportData = {
-            meta: { version: 1, exportedAt: new Date().toISOString() },
-            weight: weight,
-            events: events,
-            labResults: labResults,
-            doseTemplates: doseTemplates
-        };
+        const exportData = buildExportPayload();
         const json = JSON.stringify(exportData, null, 2);
 
         if (encrypt) {
             const { data, password } = await encryptData(json, customPassword);
+            downloadFile(data, `hrt-dosages-encrypted-${new Date().toISOString().split('T')[0]}.json`);
             if (!customPassword) {
-                setGeneratedPassword(password);
-                setIsPasswordDisplayOpen(true);
+                return password;
             }
-            await exportTextFile({
-                filename: `hrt-dosages-encrypted-${new Date().toISOString().split('T')[0]}.json`,
-                mimeType: 'application/json',
-                content: data,
-            });
         } else {
-            await exportTextFile({
-                filename: `hrt-dosages-${new Date().toISOString().split('T')[0]}.json`,
-                mimeType: 'application/json',
-                content: json,
-            });
+            downloadFile(json, `hrt-dosages-${new Date().toISOString().split('T')[0]}.json`);
         }
+        return null;
     };
 
     const handleCloudSave = async () => {
         if (!token) { setIsAuthModalOpen(true); return; }
-        const exportData = {
-            meta: { version: 1, exportedAt: new Date().toISOString() },
-            weight: weight,
-            events: events,
-            labResults: labResults,
-            doseTemplates: doseTemplates
-        };
+        const exportData = buildExportPayload();
         try {
             await cloudService.save(token, exportData);
-            showDialog('alert', 'Data saved to cloud successfully!');
+            showDialog('alert', t('account.cloud_save_success'));
         } catch (e) {
-            showDialog('alert', 'Failed to save to cloud.');
+            showDialog('alert', t('account.cloud_save_failed'));
         }
     };
 
-    const handleCloudLoad = async () => {
+    const handleCloudLoad = async (backupId?: string) => {
         if (!token) { setIsAuthModalOpen(true); return; }
         try {
-            const list = await cloudService.load(token);
-            if (!list || list.length === 0) {
-                showDialog('alert', 'No cloud backups found.');
-                return;
+            let parsed: any;
+            let timestamp: number;
+            if (backupId) {
+                const backup = await cloudService.loadOne(token, backupId);
+                parsed = JSON.parse(backup.data);
+                timestamp = backup.created_at;
+            } else {
+                const list = await cloudService.load(token);
+                if (!list || list.length === 0) {
+                    showDialog('alert', t('account.no_cloud_backups'));
+                    return;
+                }
+                const latest = list[0];
+                parsed = JSON.parse(latest.data);
+                timestamp = latest.created_at;
             }
-            const latest = list[0];
-            const parsed = JSON.parse(latest.data);
-            showDialog('confirm', `Load backup from ${new Date(latest.created_at * 1000).toLocaleString()}? This will overwrite local data.`, () => {
+            showDialog('confirm', (t('account.load_confirm') as string).replace('{time}', new Date(timestamp * 1000).toLocaleString()), () => {
                 processImportedData(parsed);
             });
         } catch (e) {
-            showDialog('alert', 'Failed to load from cloud.');
+            showDialog('alert', t('account.cloud_load_failed'));
+        }
+    };
+
+    const handleCloudMerge = async (backupId: string) => {
+        if (!token) { setIsAuthModalOpen(true); return; }
+        try {
+            const backup = await cloudService.loadOne(token, backupId);
+            const parsed = JSON.parse(backup.data);
+            mergeImportedData(parsed);
+        } catch (e) {
+            showDialog('alert', t('account.merge_cloud_failed'));
         }
     };
 
@@ -303,27 +317,25 @@ const AppContent = () => {
     // The hook provides navItems.
 
     return (
-        <div className="h-screen w-full bg-[var(--color-m3-surface)] dark:bg-[var(--color-m3-dark-surface)] flex flex-col md:flex-row font-sans text-[var(--color-m3-on-surface)] dark:text-[var(--color-m3-dark-on-surface)] select-none overflow-hidden transition-colors duration-300">
+        <div className="h-[100dvh] w-full bg-[var(--color-m3-surface)] dark:bg-[var(--color-m3-dark-surface)] flex flex-col md:flex-row font-sans text-[var(--color-m3-on-surface)] dark:text-[var(--color-m3-dark-on-surface)] select-none overflow-hidden transition-colors duration-300">
             <Sidebar
                 navItems={navItems}
                 currentView={currentView}
-                onViewChange={handleViewChange}
-                currentTime={currentTime}
-                lang={lang}
-                t={t}
+                onViewChange={(v) => !needsSetup2FA && handleViewChange(v)}
             />
             <div className="flex-1 flex flex-col overflow-hidden w-full bg-[var(--color-m3-surface-dim)] dark:bg-[var(--color-m3-dark-surface)] relative transition-colors duration-300">
 
                 <div
                     ref={mainScrollRef}
                     key={currentView}
-                    className={`flex-1 flex flex-col overflow-y-auto scrollbar-hide page-transition ${androidApp ? 'android-top-gap' : ''} ${transitionDirection === 'forward' ? 'page-forward' : 'page-backward'}`}
+                    className={`flex-1 flex flex-col overflow-y-auto scrollbar-hide page-transition ${transitionDirection === 'forward' ? 'page-forward' : 'page-backward'}`}
                 >
                     {currentView === 'home' && (
                         <Home
                             t={t}
                             currentLevel={currentLevel}
                             currentCPA={currentCPA}
+                            currentT={currentT}
                             currentStatus={currentStatus}
                             events={events}
                             weight={weight}
@@ -349,6 +361,9 @@ const AppContent = () => {
                             onDeleteEvent={deleteEvent}
                             onSaveTemplate={addTemplate}
                             onDeleteTemplate={deleteTemplate}
+                            quickDoses={quickDoses}
+                            onAddQuickDose={addQuickDose}
+                            onDeleteQuickDose={deleteQuickDose}
                             groupedEvents={groupedEvents}
                             onEditEvent={handleEditEvent}
                         />
@@ -381,20 +396,24 @@ const AppContent = () => {
                             theme={theme}
                             setTheme={setTheme}
                             languageOptions={languageOptions}
-                            setIsImportModalOpen={setIsImportModalOpen}
-                            onSaveDosages={handleSaveDosages}
+                            onImportJson={importEventsFromJson}
+                            labResults={labResults}
+                            onExport={handleExportConfirm}
                             onQuickExport={handleQuickExport}
                             onClearAllEvents={clearAllEvents}
                             events={events}
                             showDialog={showDialog}
                             setIsDisclaimerOpen={setIsDisclaimerOpen}
+                            setIsTransparencyOpen={setIsTransparencyOpen}
                             appVersion={APP_VERSION}
                             weight={weight}
                             setIsWeightModalOpen={setIsWeightModalOpen}
+                            pkParams={pkParams}
+                            onNavigateToPKParams={() => handleViewChange('pk-params')}
                         />
                     )}
 
-                    {featureFlags.account && currentView === 'account' && (
+                    {currentView === 'account' && (
                         <Account
                             t={t}
                             user={user}
@@ -403,43 +422,80 @@ const AppContent = () => {
                             onLogout={logout}
                             onCloudSave={handleCloudSave}
                             onCloudLoad={handleCloudLoad}
+                            onCloudMerge={handleCloudMerge}
+                            localData={{ events, labResults, doseTemplates, weight }}
+                            onNavigate={(v) => handleViewChange(v as ViewKey)}
+                            twoFAEnabled={twoFAEnabled}
+                            onTwoFAStatusChange={setTwoFAEnabled}
                         />
                     )}
 
-                    {featureFlags.admin && currentView === 'admin' && user?.isAdmin && (
+                    {currentView === 'sessions' && token && (
+                        <SessionsPage
+                            token={token}
+                            onBack={() => handleViewChange('account')}
+                        />
+                    )}
+
+                    {currentView === 'two-factor' && token && (
+                        <TwoFactorPage
+                            token={token}
+                            enabled={twoFAEnabled}
+                            onStatusChange={(v) => { setTwoFAEnabled(v); if (v) clearSetup2FA(); }}
+                            onBack={() => handleViewChange('account')}
+                            setupRequired={needsSetup2FA}
+                        />
+                    )}
+
+                    {currentView === 'pk-params' && (
+                        <PKParamsPage
+                            pkParams={pkParams}
+                            onSave={setPkParams}
+                            onReset={clearPkParams}
+                            onBack={() => handleViewChange('settings')}
+                        />
+                    )}
+
+                    {currentView === 'admin' && user?.isAdmin && (
                         <Admin t={t} />
                     )}
                 </div>
 
                 {/* Bottom Navigation - M3 Navigation Bar */}
-                <nav className="fixed bottom-0 left-0 right-0 px-4 pb-4 pt-2 bg-transparent z-40 safe-area-pb md:hidden pointer-events-none">
-                    <div className="w-full pointer-events-auto bg-[var(--color-m3-surface-container-lowest)]/85 dark:bg-[var(--color-m3-dark-surface-container)]/85 backdrop-blur-2xl backdrop-saturate-150 border border-[var(--color-m3-outline-variant)]/30 dark:border-[var(--color-m3-dark-outline-variant)]/30 shadow-[var(--shadow-m3-3)] rounded-[var(--radius-xl)] px-1 py-1.5 flex items-center justify-around gap-0.5 transition-all duration-300">
+                <nav className="fixed bottom-0 left-0 right-0 z-40 safe-area-pb md:hidden">
+                    <div className="w-full bg-[var(--color-m3-surface-container-lowest)] dark:bg-[var(--color-m3-dark-surface-container)] border-t border-[var(--color-m3-outline-variant)] dark:border-[var(--color-m3-dark-outline-variant)] flex items-center transition-all duration-300">
                         {navItems.filter(item => item.id !== 'admin').map(({ id, icon: Icon, label }) => {
                             const isActive = currentView === id;
+                            const isDisabled = needsSetup2FA && id !== 'two-factor';
                             return (
                                 <button
                                     key={id}
-                                    onClick={() => handleViewChange(id as ViewKey)}
-                                    className="flex-1 flex flex-col items-center gap-0.5 py-2 transition-all duration-500 rounded-[var(--radius-xl)] relative m3-state-layer overflow-hidden"
+                                    onClick={() => !isDisabled && handleViewChange(id as ViewKey)}
+                                    disabled={isDisabled}
+                                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 pt-3 pb-2 transition-colors duration-300 relative group
+                                        ${isDisabled
+                                            ? 'text-gray-300 dark:text-neutral-600 cursor-not-allowed'
+                                            : isActive
+                                            ? 'text-[var(--color-m3-primary)] dark:text-[var(--color-m3-primary-light)]'
+                                            : 'text-gray-600 dark:text-gray-400 hover:text-[var(--color-m3-on-surface)] dark:hover:text-[var(--color-m3-dark-on-surface)]'
+                                        }`}
                                 >
-                                    <Ripple />
-                                    <div className={`px-5 py-1.5 rounded-[var(--radius-full)] transition-all duration-500 z-10 ${isActive
-                                        ? 'bg-[var(--color-m3-primary-container)] dark:bg-teal-900/40'
-                                        : 'bg-transparent'
-                                        }`}>
+                                    {/* Active indicator underline */}
+                                    <span 
+                                        className={`absolute bottom-0 left-0 w-full h-[2px] bg-current transition-opacity duration-300 ease-out
+                                            ${isActive 
+                                                ? 'opacity-100' 
+                                                : 'opacity-0'
+                                            }`}
+                                    />
+                                    
+                                    <span className="z-10">
                                         <Icon
-                                            size={20}
-                                            strokeWidth={isActive ? 2.5 : 1.8}
-                                            className={`transition-all duration-300 ${isActive
-                                                ? 'text-[var(--color-m3-primary)] dark:text-teal-400'
-                                                : 'text-[var(--color-m3-on-surface-variant)] dark:text-[var(--color-m3-dark-on-surface-variant)]'
-                                                }`}
+                                            size={22}
+                                            strokeWidth={isActive ? 2.5 : 2}
                                         />
-                                    </div>
-                                    <span className={`text-[10px] font-semibold tracking-tight transition-all duration-300 z-10 ${isActive
-                                        ? 'text-[var(--color-m3-primary)] dark:text-teal-400'
-                                        : 'text-[var(--color-m3-on-surface-variant)] dark:text-[var(--color-m3-dark-on-surface-variant)]'
-                                        }`}>
+                                    </span>
+                                    <span className="text-[10px] font-medium tracking-tight z-10">
                                         {label}
                                     </span>
                                 </button>
@@ -456,12 +512,6 @@ const AppContent = () => {
                 events={events}
                 labResults={labResults}
                 weight={weight}
-            />
-
-            <PasswordDisplayModal
-                isOpen={isPasswordDisplayOpen}
-                onClose={() => setIsPasswordDisplayOpen(false)}
-                password={generatedPassword}
             />
 
             <PasswordInputModal
@@ -481,7 +531,7 @@ const AppContent = () => {
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
                 eventToEdit={editingEvent}
-                onSave={e => {
+                onSave={(e: DoseEvent) => {
                     if (events.find(p => p.id === e.id)) updateEvent(e);
                     else addEvent(e);
                 }}
@@ -489,11 +539,19 @@ const AppContent = () => {
                 templates={doseTemplates}
                 onSaveTemplate={addTemplate}
                 onDeleteTemplate={deleteTemplate}
+                quickDoses={quickDoses}
+                onAddQuickDose={addQuickDose}
+                onDeleteQuickDose={deleteQuickDose}
             />
 
             <DisclaimerModal
                 isOpen={isDisclaimerOpen}
                 onClose={() => setIsDisclaimerOpen(false)}
+            />
+
+            <TransparencyModal
+                isOpen={isTransparencyOpen}
+                onClose={() => setIsTransparencyOpen(false)}
             />
 
             <ImportModal
@@ -523,13 +581,15 @@ const AppContent = () => {
 
 const App = () => (
     <LanguageProvider>
-        <DialogProvider>
-            <AuthProvider>
-                <ErrorBoundary>
-                    <AppContent />
-                </ErrorBoundary>
-            </AuthProvider>
-        </DialogProvider>
+        <HRTModeProvider>
+            <DialogProvider>
+                <AuthProvider>
+                    <ErrorBoundary>
+                        <AppContent />
+                    </ErrorBoundary>
+                </AuthProvider>
+            </DialogProvider>
+        </HRTModeProvider>
     </LanguageProvider>
 );
 

@@ -1,9 +1,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { DoseEvent, LabResult } from '../../logic';
+import { DoseEvent, LabResult, Route, Ester, isTestosteroneEster, isT_LabUnit } from '../../logic';
 import { formatDate } from '../utils/helpers';
 import { Lang, TRANSLATIONS } from '../i18n/translations';
-import { exportBlobFile } from './deviceExport';
 
 // Define the type for user-friendly export data
 interface ExportData {
@@ -34,7 +33,7 @@ export const exportToCSV = (data: ExportData): string => {
         rows.push([
             t('export.val.dose'),
             date,
-            'Estradiol',
+            isTestosteroneEster(e.ester) ? 'Testosterone' : e.ester === Ester.CPA ? 'Cyproterone Acetate' : 'Estradiol',
             e.doseMG,
             'mg',
             `${e.route} - ${e.ester}`
@@ -47,7 +46,7 @@ export const exportToCSV = (data: ExportData): string => {
         rows.push([
             t('export.val.lab'),
             date,
-            'Estradiol',
+            isT_LabUnit(l.unit) ? 'Testosterone' : 'Estradiol',
             l.concValue,
             l.unit,
             '-'
@@ -57,7 +56,7 @@ export const exportToCSV = (data: ExportData): string => {
     return rows.map(r => r.join(',')).join('\n');
 };
 
-export const exportToPDF = async (data: ExportData) => {
+export const exportToPDF = (data: ExportData) => {
     const { events, labResults } = data;
     // Force English for PDF to avoid font issues with non-Latin characters
     const safeLang = 'en';
@@ -106,15 +105,5 @@ export const exportToPDF = async (data: ExportData) => {
         body: labRows,
     });
 
-    await exportBlobFile({
-        filename: `hrt-report-${new Date().toISOString().split('T')[0]}.pdf`,
-        mimeType: 'application/pdf',
-        blob: doc.output('blob'),
-        fallbackText: JSON.stringify({
-            title: tSafe('export.pdf.title'),
-            generatedOn: new Date().toISOString(),
-            events: eventRows,
-            labs: labRows,
-        }, null, 2),
-    });
+    doc.save(`hrt-report-${new Date().toISOString().split('T')[0]}.pdf`);
 };

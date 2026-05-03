@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Activity, Calendar, FlaskConical, Settings as SettingsIcon, UserCircle, ShieldCheck } from 'lucide-react';
+import { Activity, ListTodo, FlaskConical, Settings as SettingsIcon, UserCircle, ShieldCheck } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
-import { featureFlags } from '../platform/features';
 
-export type ViewKey = 'home' | 'history' | 'lab' | 'settings' | 'account' | 'admin';
+export type ViewKey = 'home' | 'history' | 'lab' | 'settings' | 'account' | 'admin' | 'sessions' | 'two-factor' | 'pk-params';
 
 export const useAppNavigation = (user: any) => {
     const { t } = useTranslation();
@@ -13,7 +12,7 @@ export const useAppNavigation = (user: any) => {
     const [transitionDirection, setTransitionDirection] = useState<'forward' | 'backward'>('forward');
     const mainScrollRef = useRef<HTMLDivElement>(null);
 
-    const viewOrder: ViewKey[] = ['home', 'history', 'lab', 'settings', 'account', 'admin'];
+    const viewOrder: ViewKey[] = ['home', 'history', 'lab', 'settings', 'account', 'sessions', 'two-factor', 'pk-params', 'admin'];
 
     // --- Actions ---
     const handleViewChange = (view: ViewKey) => {
@@ -34,16 +33,13 @@ export const useAppNavigation = (user: any) => {
     // --- Derived Data ---
     const navItems = [
         { id: 'home', label: t('nav.home'), icon: Activity },
-        { id: 'history', label: t('nav.history'), icon: Calendar },
+        { id: 'history', label: t('nav.history'), icon: ListTodo },
         { id: 'lab', label: t('nav.lab'), icon: FlaskConical },
         { id: 'settings', label: t('nav.settings'), icon: SettingsIcon },
+        { id: 'account', label: t('nav.account'), icon: UserCircle },
     ];
 
-    if (featureFlags.account) {
-        navItems.push({ id: 'account', label: t('nav.account'), icon: UserCircle });
-    }
-
-    if (featureFlags.admin && user?.isAdmin) {
+    if (user?.isAdmin) {
         navItems.push({ id: 'admin', label: 'Admin', icon: ShieldCheck });
     }
 

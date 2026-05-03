@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import DoseForm, { DoseTemplate } from './DoseForm';
+import { QuickDose } from './dose_form/QuickDoseButtons';
 import { useEscape } from '../hooks/useEscape';
 
-export type { DoseTemplate };
+export type { DoseTemplate, QuickDose };
 
 interface DoseFormModalProps {
     isOpen: boolean;
@@ -13,6 +14,9 @@ interface DoseFormModalProps {
     templates?: DoseTemplate[];
     onSaveTemplate?: any;
     onDeleteTemplate?: any;
+    quickDoses?: QuickDose[];
+    onAddQuickDose?: (dose: QuickDose) => void;
+    onDeleteQuickDose?: (id: string) => void;
 }
 
 const DoseFormModal: React.FC<DoseFormModalProps> = ({
@@ -23,7 +27,10 @@ const DoseFormModal: React.FC<DoseFormModalProps> = ({
     onDelete,
     templates = [],
     onSaveTemplate,
-    onDeleteTemplate
+    onDeleteTemplate,
+    quickDoses = [],
+    onAddQuickDose,
+    onDeleteQuickDose
 }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
@@ -60,8 +67,8 @@ const DoseFormModal: React.FC<DoseFormModalProps> = ({
     if (!isVisible && !isOpen) return null;
 
     return (
-        <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50 mobile-modal-shell ${isClosing ? 'animate-out fade-out duration-200' : 'animate-in fade-in duration-200'}`}>
-            <div className={`bg-[var(--color-m3-surface-container-lowest)] dark:bg-[var(--color-m3-dark-surface-container)] rounded-t-[var(--radius-xl)] md:rounded-[var(--radius-xl)] shadow-[var(--shadow-m3-3)] border border-[var(--color-m3-outline-variant)] dark:border-[var(--color-m3-dark-outline-variant)] w-full max-w-lg md:max-w-xl h-[92vh] md:max-h-[85vh] mobile-modal-panel flex flex-col overflow-hidden transition-colors duration-300 ${isClosing ? 'animate-out slide-out-to-bottom duration-250' : 'animate-in slide-in-from-bottom duration-300'}`}>
+        <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50 ${isClosing ? 'animate-out fade-out duration-200' : 'animate-in fade-in duration-200'}`}>
+            <div className={`bg-[var(--color-m3-surface-container-lowest)] dark:bg-[var(--color-m3-dark-surface-container)] rounded-t-[var(--radius-xl)] md:rounded-[var(--radius-xl)] shadow-[var(--shadow-m3-3)] border border-[var(--color-m3-outline-variant)] dark:border-[var(--color-m3-dark-outline-variant)] w-full max-w-lg md:max-w-xl h-[92vh] md:max-h-[85vh] flex flex-col overflow-hidden transition-colors duration-300 ${isClosing ? 'animate-out slide-out-to-bottom duration-250' : 'animate-in slide-in-from-bottom duration-300'}`}>
 
                 <DoseForm
                     eventToEdit={eventToEdit}
@@ -71,6 +78,8 @@ const DoseFormModal: React.FC<DoseFormModalProps> = ({
                     templates={templates}
                     onSaveTemplate={onSaveTemplate}
                     onDeleteTemplate={onDeleteTemplate}
+                    onAddQuickDose={onAddQuickDose}
+                    onDeleteQuickDose={onDeleteQuickDose}
                     isInline={false}
                 />
             </div>

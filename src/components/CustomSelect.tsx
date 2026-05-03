@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
-import Ripple from './Ripple';
 
 interface Option {
     value: string;
     label: string;
     icon?: React.ReactNode;
+    description?: string;
 }
 
 interface CustomSelectProps {
@@ -103,7 +103,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, options, l
     return (
         <div className="space-y-1.5 flex flex-col" ref={containerRef}>
             {label && !icon && (
-                <label className="block text-xs font-bold text-[var(--color-m3-on-surface-variant)] dark:text-[var(--color-m3-dark-on-surface-variant)] uppercase tracking-wider pl-1.5">
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 pl-1">
                     {label}
                 </label>
             )}
@@ -112,30 +112,34 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, options, l
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`group w-full min-h-[56px] px-4 py-3 bg-[var(--color-m3-surface-container-lowest)] dark:bg-[var(--color-m3-dark-surface-container)] border transition-all duration-300 outline-none flex items-center justify-between m3-state-layer overflow-hidden
+                    className={`group w-full min-h-[44px] px-3 py-2 bg-white dark:bg-neutral-900 border transition-colors outline-none flex items-center justify-between overflow-hidden
                         ${isOpen
-                            ? 'border-[var(--color-m3-primary)] dark:border-teal-400 ring-1 ring-[var(--color-m3-primary)] dark:ring-teal-400 rounded-t-[var(--radius-md)]'
-                            : 'border-[var(--color-m3-outline-variant)] dark:border-[var(--color-m3-dark-outline-variant)] hover:border-[var(--color-m3-on-surface)] dark:hover:border-[var(--color-m3-dark-on-surface)] rounded-[var(--radius-md)]'}`}
+                            ? 'border-pink-500 ring-1 ring-pink-500 rounded-t-md'
+                            : 'border-gray-200 dark:border-neutral-800 hover:border-gray-300 dark:hover:border-neutral-700 rounded-md'}`}
                 >
-                    <Ripple />
                     {icon ? (
                         <>
-                            <div className="flex items-center gap-3">
-                                {icon}
-                                <span className="font-bold text-[var(--color-m3-on-surface)] dark:text-[var(--color-m3-dark-on-surface)] text-sm">{label}</span>
-                            </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-[var(--color-m3-on-surface-variant)] dark:text-[var(--color-m3-dark-on-surface-variant)]">{selectedOption?.label}</span>
-                                <ChevronDown size={20} className={`text-[var(--color-m3-on-surface-variant)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                                {icon}
+                                <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{label}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-sm text-gray-500">{selectedOption?.label}</span>
+                                <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                             </div>
                         </>
                     ) : (
                         <>
-                            <div className="flex items-center gap-3">
-                                {selectedOption?.icon && <div className="text-[var(--color-m3-on-surface-variant)] dark:text-[var(--color-m3-dark-on-surface-variant)]">{selectedOption.icon}</div>}
-                                <span className="font-bold text-[var(--color-m3-on-surface)] dark:text-[var(--color-m3-dark-on-surface)]">{selectedOption?.label || value}</span>
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                {selectedOption?.icon && <div className="text-gray-500 dark:text-gray-400">{selectedOption.icon}</div>}
+                                <span className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{selectedOption?.label || value}</span>
                             </div>
-                            <ChevronDown size={20} className={`text-[var(--color-m3-on-surface-variant)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                            <div className="flex items-center gap-1.5 shrink-0">
+                                {selectedOption?.description && (
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">{selectedOption.description}</span>
+                                )}
+                                <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                            </div>
                         </>
                     )}
                 </button>
@@ -144,22 +148,26 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, options, l
                     <div
                         ref={dropdownRef}
                         style={positionStyle}
-                        className="fixed z-[999] bg-[var(--color-m3-surface-container-lowest)] dark:bg-[var(--color-m3-dark-surface-container-high)] border border-[var(--color-m3-outline-variant)] dark:border-[var(--color-m3-dark-outline-variant)] rounded-b-[var(--radius-md)] shadow-[var(--shadow-m3-3)] overflow-y-auto animate-in fade-in zoom-in-95 duration-200 py-2"
+                        className="fixed z-[999] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 border-t-0 rounded-b-md shadow-sm overflow-y-auto animate-in fade-in duration-100 py-1"
                     >
                         {options.map(opt => (
                             <button
                                 key={opt.value}
                                 onClick={() => handleSelect(opt.value)}
-                                className={`w-full px-4 py-3 text-start flex items-center gap-3 transition-colors relative m3-state-layer overflow-hidden
+                                className={`w-full px-3 py-2 text-start flex items-center gap-2 transition-colors relative overflow-hidden
                                     ${opt.value === value
-                                        ? 'bg-[var(--color-m3-secondary-container)] dark:bg-teal-900/40 text-[var(--color-m3-on-secondary-container)] dark:text-teal-200 font-bold'
-                                        : 'text-[var(--color-m3-on-surface)] dark:text-[var(--color-m3-dark-on-surface)] hover:bg-[var(--color-m3-surface-container-high)] dark:hover:bg-[var(--color-m3-dark-surface-container-highest)]'}`}
+                                        ? 'bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-400 font-medium'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800'}`}
                             >
-                                <Ripple />
-                                {opt.icon && <div className={`${opt.value === value ? 'text-inherit' : 'text-[var(--color-m3-on-surface-variant)] dark:text-[var(--color-m3-dark-on-surface-variant)]'}`}>{opt.icon}</div>}
+                                {opt.icon && <div className={`${opt.value === value ? 'text-inherit' : 'text-gray-400 dark:text-gray-500'}`}>{opt.icon}</div>}
                                 <span className="flex-1 text-sm">{opt.label}</span>
+                                {opt.description && (
+                                    <span className={`text-xs ${opt.value === value ? 'text-pink-600 dark:text-pink-300' : 'text-gray-500 dark:text-gray-400'}`}>
+                                        {opt.description}
+                                    </span>
+                                )}
                                 {opt.value === value && (
-                                    <Check size={18} className="text-[var(--color-m3-primary)] dark:text-teal-400" strokeWidth={3} />
+                                    <Check size={16} className="text-pink-600 dark:text-pink-400" strokeWidth={2.5} />
                                 )}
                             </button>
                         ))}

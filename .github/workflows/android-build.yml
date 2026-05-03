@@ -47,13 +47,26 @@ jobs:
       - name: Sync web to Android
         run: npm run android:sync
 
+      - name: Get version
+        run: echo "VERSION=${npm_package_version}" >> $GITHUB_ENV
+
       - name: Build debug APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
+      - name: Upload to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: android/app/build/outputs/apk/debug/*.apk
+          name: ${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload APK
+        if: github.event_name != 'release'
         uses: actions/upload-artifact@v4
         with:
           name: android-debug-apk

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings as SettingsIcon, Languages, Palette, Sun, Moon, Monitor, Upload, Download, Copy, Trash2, Info, Github, AlertTriangle, Scale, ChevronDown, Eye, User, SlidersHorizontal, ChevronRight } from 'lucide-react';
+import { Settings as SettingsIcon, Languages, Palette, Sun, Moon, Monitor, Upload, Download, Copy, Trash2, Info, Github, AlertTriangle, Scale, ChevronDown, User, SlidersHorizontal, ChevronRight } from 'lucide-react';
 import CustomSelect from '../components/CustomSelect';
 import ExportSection from '../components/ExportSection';
 import ImportSection from '../components/ImportSection';
@@ -23,7 +23,6 @@ interface SettingsProps {
     events: DoseEvent[];
     showDialog: (type: 'alert' | 'confirm', message: string, onConfirm?: () => void) => void;
     setIsDisclaimerOpen: (isOpen: boolean) => void;
-    setIsTransparencyOpen: (isOpen: boolean) => void;
     appVersion: string;
     weight: number;
     setIsWeightModalOpen: (isOpen: boolean) => void;
@@ -46,7 +45,6 @@ const Settings: React.FC<SettingsProps> = ({
     events,
     showDialog,
     setIsDisclaimerOpen,
-    setIsTransparencyOpen,
     appVersion,
     weight,
     setIsWeightModalOpen,
@@ -231,14 +229,6 @@ const Settings: React.FC<SettingsProps> = ({
                     >
                         <Github className="text-gray-600 dark:text-gray-400" size={18} />
                         <span className="font-semibold text-gray-900 dark:text-gray-100">{t('drawer.github')}</span>
-                    </button>
-
-                    <button
-                        onClick={() => setIsTransparencyOpen(true)}
-                        className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors text-start"
-                    >
-                        <Eye className="text-emerald-500" size={18} />
-                        <span className="font-semibold text-gray-900 dark:text-gray-100">{t('transparency.title')}</span>
                     </button>
 
                     <button

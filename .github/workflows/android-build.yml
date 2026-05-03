@@ -64,7 +64,13 @@ jobs:
         run: |
           mkdir -p android/app
           cd android/app
-          printf '%s' "$KS_FILE" | base64 -d > key.jks
+          echo "=== KS_FILE length ==="
+          printf '%s' "$KS_FILE" | wc -c
+          echo "=== First 50 chars (hex) ==="
+          printf '%s' "$KS_FILE" | head -c 50 | od -A x -t x1z
+          echo "=== Last 50 chars (hex) ==="
+          printf '%s' "$KS_FILE" | tail -c 50 | od -A x -t x1z
+          printf '%s' "$KS_FILE" | base64 -d > key.jks 2>&1 | head -n 10
           ls -la key.jks
           cd ..
           printf 'storePassword=%s\n' "$KS_STORE_PASS" > keystore.properties

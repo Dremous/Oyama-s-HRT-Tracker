@@ -33,7 +33,7 @@
 }
 
 .android-top-gap {
-    padding-top: max(var(--safe-area-top), 20px);
+    padding-top: max(var(--safe-area-top), 40px);
 }
 
 @media (max-width: 767px) {

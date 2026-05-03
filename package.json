@@ -13,7 +13,12 @@
     "wrangler:migrate:remote": "wrangler d1 execute hrt-tracker-prod --remote --file=schema.sql",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:run": "npm run build && npx cap run android",
+    "android:copy": "npm run build && npx cap copy android",
+    "android:release": "npm run android:sync && cd android && gradlew.bat assembleRelease"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",

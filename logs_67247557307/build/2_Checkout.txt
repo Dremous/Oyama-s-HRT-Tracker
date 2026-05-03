@@ -1,0 +1,74 @@
+﻿2026-05-03T14:24:20.0560225Z ##[group]Run actions/checkout@v4
+2026-05-03T14:24:20.0561617Z with:
+2026-05-03T14:24:20.0562394Z   repository: Dremous/Oyama-s-HRT-Tracker
+2026-05-03T14:24:20.0563644Z   token: ***
+2026-05-03T14:24:20.0564414Z   ssh-strict: true
+2026-05-03T14:24:20.0565238Z   ssh-user: git
+2026-05-03T14:24:20.0565997Z   persist-credentials: true
+2026-05-03T14:24:20.0566916Z   clean: true
+2026-05-03T14:24:20.0567992Z   sparse-checkout-cone-mode: true
+2026-05-03T14:24:20.0568904Z   fetch-depth: 1
+2026-05-03T14:24:20.0569819Z   fetch-tags: false
+2026-05-03T14:24:20.0570631Z   show-progress: true
+2026-05-03T14:24:20.0571421Z   lfs: false
+2026-05-03T14:24:20.0572108Z   submodules: false
+2026-05-03T14:24:20.0572958Z   set-safe-directory: true
+2026-05-03T14:24:20.0574069Z env:
+2026-05-03T14:24:20.0575005Z   JAVA_VERSION: 21
+2026-05-03T14:24:20.0575867Z ##[endgroup]
+2026-05-03T14:24:20.1648454Z Syncing repository: Dremous/Oyama-s-HRT-Tracker
+2026-05-03T14:24:20.1651071Z ##[group]Getting Git version info
+2026-05-03T14:24:20.1652541Z Working directory is '/home/runner/work/Oyama-s-HRT-Tracker/Oyama-s-HRT-Tracker'
+2026-05-03T14:24:20.1654766Z [command]/usr/bin/git version
+2026-05-03T14:24:20.1679182Z git version 2.53.0
+2026-05-03T14:24:20.1703766Z ##[endgroup]
+2026-05-03T14:24:20.1718586Z Temporarily overriding HOME='/home/runner/work/_temp/69ba543e-38be-4477-8d52-323a85f7e49b' before making global git config changes
+2026-05-03T14:24:20.1722378Z Adding repository directory to the temporary git global config as a safe directory
+2026-05-03T14:24:20.1731375Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Oyama-s-HRT-Tracker/Oyama-s-HRT-Tracker
+2026-05-03T14:24:20.1760107Z Deleting the contents of '/home/runner/work/Oyama-s-HRT-Tracker/Oyama-s-HRT-Tracker'
+2026-05-03T14:24:20.1763195Z ##[group]Initializing the repository
+2026-05-03T14:24:20.1767270Z [command]/usr/bin/git init /home/runner/work/Oyama-s-HRT-Tracker/Oyama-s-HRT-Tracker
+2026-05-03T14:24:20.1844106Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-05-03T14:24:20.1847548Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-05-03T14:24:20.1850322Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-05-03T14:24:20.1852242Z hint: call:
+2026-05-03T14:24:20.1852952Z hint:
+2026-05-03T14:24:20.1853821Z hint: 	git config --global init.defaultBranch <name>
+2026-05-03T14:24:20.1854939Z hint:
+2026-05-03T14:24:20.1855965Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-05-03T14:24:20.1858328Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-05-03T14:24:20.1916591Z hint:
+2026-05-03T14:24:20.1918275Z hint: 	git branch -m <name>
+2026-05-03T14:24:20.1919648Z hint:
+2026-05-03T14:24:20.1921428Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-05-03T14:24:20.1923521Z Initialized empty Git repository in /home/runner/work/Oyama-s-HRT-Tracker/Oyama-s-HRT-Tracker/.git/
+2026-05-03T14:24:20.1926633Z [command]/usr/bin/git remote add origin https://github.com/Dremous/Oyama-s-HRT-Tracker
+2026-05-03T14:24:20.1930159Z ##[endgroup]
+2026-05-03T14:24:20.1931488Z ##[group]Disabling automatic garbage collection
+2026-05-03T14:24:20.1933108Z [command]/usr/bin/git config --local gc.auto 0
+2026-05-03T14:24:20.1935475Z ##[endgroup]
+2026-05-03T14:24:20.1936556Z ##[group]Setting up auth
+2026-05-03T14:24:20.1937963Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-03T14:24:20.1957433Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-03T14:24:20.2216684Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-03T14:24:20.2243830Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-03T14:24:20.2441539Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-03T14:24:20.2467952Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-03T14:24:20.2675952Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-05-03T14:24:20.2711765Z ##[endgroup]
+2026-05-03T14:24:20.2713917Z ##[group]Fetching the repository
+2026-05-03T14:24:20.2722555Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +6da298ea07031ef62fe37db1fc861c890f8a1444:refs/remotes/origin/1.0.2
+2026-05-03T14:24:20.8154665Z From https://github.com/Dremous/Oyama-s-HRT-Tracker
+2026-05-03T14:24:20.8155853Z  * [new ref]         6da298ea07031ef62fe37db1fc861c890f8a1444 -> origin/1.0.2
+2026-05-03T14:24:20.8181050Z ##[endgroup]
+2026-05-03T14:24:20.8181739Z ##[group]Determining the checkout info
+2026-05-03T14:24:20.8183513Z ##[endgroup]
+2026-05-03T14:24:20.8188385Z [command]/usr/bin/git sparse-checkout disable
+2026-05-03T14:24:20.8222118Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-05-03T14:24:20.8246143Z ##[group]Checking out the ref
+2026-05-03T14:24:20.8250043Z [command]/usr/bin/git checkout --progress --force -B 1.0.2 refs/remotes/origin/1.0.2
+2026-05-03T14:24:20.8475463Z Switched to a new branch '1.0.2'
+2026-05-03T14:24:20.8478091Z branch '1.0.2' set up to track 'origin/1.0.2'.
+2026-05-03T14:24:20.8484726Z ##[endgroup]
+2026-05-03T14:24:20.8515940Z [command]/usr/bin/git log -1 --format=%H
+2026-05-03T14:24:20.8536631Z 6da298ea07031ef62fe37db1fc861c890f8a1444

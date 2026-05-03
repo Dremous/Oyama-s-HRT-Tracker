@@ -70,7 +70,9 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --build-cache --info 2>&1 | tail -50
+          ./gradlew assembleRelease --build-cache
+          ls -la app/build/outputs/apk/release/ 2>/dev/null || echo "Release APK not found"
+          ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "Debug APK not found"
 
       - name: Check APK output
         run: find android/app/build/outputs -name "*.apk" 2>/dev/null || echo "No APK found"

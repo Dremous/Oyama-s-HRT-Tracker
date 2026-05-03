@@ -66,12 +66,12 @@ jobs:
           cd android/app
           echo "=== KS_FILE length ==="
           printf '%s' "$KS_FILE" | wc -c
-          echo "=== First 50 chars (hex) ==="
-          printf '%s' "$KS_FILE" | head -c 50 | od -A x -t x1z
-          echo "=== Last 50 chars (hex) ==="
-          printf '%s' "$KS_FILE" | tail -c 50 | od -A x -t x1z
-          printf '%s' "$KS_FILE" | base64 -d > key.jks 2>&1 | head -n 10
+          echo "=== Base64 decode test ==="
+          printf '%s' "$KS_FILE" | base64 -d > key.jks
+          echo "=== key.jks size ==="
           ls -la key.jks
+          echo "=== key.jks raw bytes (first 20, hex) ==="
+          xxd -l 20 key.jks
           cd ..
           printf 'storePassword=%s\n' "$KS_STORE_PASS" > keystore.properties
           printf 'keyPassword=%s\n' "$KS_KEY_PASS" >> keystore.properties

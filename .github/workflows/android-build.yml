@@ -37,27 +37,26 @@ jobs:
       - name: Sync web to Android
         run: npm run android:sync
 
-      - name: Get version
-        run: echo "VERSION=${npm_package_version}" >> $GITHUB_ENV
+      - name: Create keystore for release
+        run: |
+          cd android/app
+          echo "$KEYSTORE_FILE" | base64 -d > key.jks
+          echo "storePassword=$STORE_PASSWORD" > keystore.properties
+          echo "keyPassword=$KEY_PASSWORD" >> keystore.properties
+          echo "keyAlias=$KEY_ALIAS" >> keystore.properties
 
-      - name: Build debug APK
+      - name: Build release APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: Build debug APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
       - name: Upload to Release
         if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: android/app/build/outputs/apk/debug/*.apk
+          asset_path: android/app/build/outputs/apk/release/*.apk
           asset_name: HRT-Tracker-${{ github.event.release.tag_name }}.apk
           asset_content_type: application/vnd.android.package
         env:
@@ -67,5 +66,5 @@ jobs:
         if: github.event_name != 'release'
         uses: actions/upload-artifact@v4
         with:
-          name: android-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: android-release-apk
+          path: android/app/build/outputs/apk/release/*.apk
